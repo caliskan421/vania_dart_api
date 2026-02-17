@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:first_vania_project/app/dto/order_dto.dart';
 import 'package:first_vania_project/app/models/cart.dart';
 import 'package:first_vania_project/app/models/cart_item.dart';
 import 'package:first_vania_project/app/models/order.dart';
@@ -23,52 +24,50 @@ class OrderService {
   static const double shippingCost = 29.90;
 
   /// Sepetten sipariş oluştur
-  Future<Map<String, dynamic>> createOrderFromCart(int userId, Map<String, dynamic> shippingData) async {
-    // Sepeti getir
-    final cart = await Cart().query.where('user_id', '=', userId).first();
+  Future<Map<String, dynamic>> createOrderFromCart(
+      int userId, Map<String, dynamic> shippingData) async {
+    final cart = await Cart().findByUserId(userId);
     if (cart == null) {
       throw Exception('Cart is empty');
     }
 
-    final cartItems = await CartItem().query.where('cart_id', '=', cart['id']).get();
+    final cartItems = await CartItem().findByCartId(cart.id);
     if (cartItems.isEmpty) {
       throw Exception('Cart is empty');
     }
 
-    // Stok kontrolü ve toplam hesapla
     double subtotal = 0;
     final orderItemsData = <Map<String, dynamic>>[];
 
     for (final item in cartItems) {
-      final product = await Product().query.where('id', '=', item['product_id']).first();
+      final product = await Product().findById(item.productId);
 
       if (product == null) {
-        throw Exception('Product #${item['product_id']} not found');
+        throw Exception('Product #${item.productId} not found');
       }
 
-      if ((product['stock'] as int) < (item['quantity'] as int)) {
-        throw Exception('Insufficient stock for ${product['name']}. Available: ${product['stock']}');
+      if (product.stock < item.quantity) {
+        throw Exception(
+            'Insufficient stock for ${product.name}. Available: ${product.stock}');
       }
 
-      final unitPrice = (item['unit_price'] as num).toDouble();
-      final qty = item['quantity'] as int;
-      final totalPrice = unitPrice * qty;
+      final totalPrice = item.unitPrice * item.quantity;
       subtotal += totalPrice;
 
       orderItemsData.add({
-        'product_id': item['product_id'],
-        'product_name': product['name'],
-        'quantity': qty,
-        'unit_price': unitPrice,
+        'product_id': item.productId,
+        'product_name': product.name,
+        'quantity': item.quantity,
+        'unit_price': item.unitPrice,
         'total_price': double.parse(totalPrice.toStringAsFixed(2)),
       });
     }
 
     final taxAmount = double.parse((subtotal * taxRate).toStringAsFixed(2));
-    final totalAmount = double.parse((subtotal + taxAmount + shippingCost).toStringAsFixed(2));
+    final totalAmount =
+        double.parse((subtotal + taxAmount + shippingCost).toStringAsFixed(2));
     final orderNumber = _generateOrderNumber();
 
-    // Siparişi oluştur
     await Order().query.insert({
       'user_id': userId,
       'order_number': orderNumber,
@@ -86,12 +85,11 @@ class OrderService {
       'updated_at': DateTime.now().toIso8601String(),
     });
 
-    final order = await Order().query.where('order_number', '=', orderNumber).first();
+    final order = await Order().findByOrderNumber(orderNumber);
 
-    // Sipariş kalemlerini oluştur
     for (final itemData in orderItemsData) {
       await OrderItem().query.insert({
-        'order_id': order!['id'],
+        'order_id': order!.id,
         'product_id': itemData['product_id'],
         'product_name': itemData['product_name'],
         'quantity': itemData['quantity'],
@@ -101,11 +99,10 @@ class OrderService {
         'updated_at': DateTime.now().toIso8601String(),
       });
 
-      // Stok azalt
-      final product = await Product().query.where('id', '=', itemData['product_id']).first();
+      final product = await Product().findById(itemData['product_id'] as int);
       if (product != null) {
-        final newStock = (product['stock'] as int) - (itemData['quantity'] as int);
-        await Product().query.where('id', '=', itemData['product_id']).update({
+        final newStock = product.stock - (itemData['quantity'] as int);
+        await Product().query.where('id', '=', product.id).update({
           'stock': newStock,
           'updated_at': DateTime.now().toIso8601String(),
         });
@@ -113,27 +110,37 @@ class OrderService {
     }
 
     // Sepeti temizle
-    await CartItem().query.where('cart_id', '=', cart['id']).delete();
+    await CartItem().query.where('cart_id', '=', cart.id).delete();
 
     // E-posta gönder
-    final user = await User().query.where('id', '=', userId).first();
+    final user = await User().findById(userId);
     if (user != null) {
-      await _emailService.sendOrderConfirmationEmail(user['email'].toString(), orderNumber, totalAmount);
+      await _emailService.sendOrderConfirmationEmail(
+          user.email, orderNumber, totalAmount);
     }
 
-    return await getOrderById(order!['id'] as int, userId: userId) ?? {};
+    return await getOrderById(order!.id, userId: userId) ?? {};
   }
 
   /// Kullanıcının siparişlerini getir
-  Future<List<Map<String, dynamic>>> getUserOrders(int userId, {int page = 1, int perPage = 20}) async {
+  Future<List<Map<String, dynamic>>> getUserOrders(int userId,
+      {int page = 1, int perPage = 20}) async {
     final offset = (page - 1) * perPage;
-    final orders = await Order().query.where('user_id', '=', userId).orderBy('created_at', 'desc').limit(perPage).offset(offset).get();
+    final orderMaps = await Order()
+        .query
+        .where('user_id', '=', userId)
+        .orderBy('created_at', 'desc')
+        .limit(perPage)
+        .offset(offset)
+        .get();
 
     final result = <Map<String, dynamic>>[];
-    for (final order in orders) {
-      final items = await OrderItem().query.where('order_id', '=', order['id']).get();
+    for (final orderMap in orderMaps) {
+      final order = OrderDto.fromMap(orderMap);
+      final items =
+          await OrderItem().query.where('order_id', '=', order.id).get();
       result.add({
-        ...order,
+        ...orderMap,
         'items': items,
       });
     }
@@ -141,18 +148,21 @@ class OrderService {
   }
 
   /// Sipariş detayı getir
-  Future<Map<String, dynamic>?> getOrderById(int orderId, {int? userId}) async {
-    var query = Order().query.where('id', '=', orderId);
+  Future<Map<String, dynamic>?> getOrderById(int orderId,
+      {int? userId}) async {
+    var q = Order().query.where('id', '=', orderId);
     if (userId != null) {
-      query = query.where('user_id', '=', userId);
+      q = q.where('user_id', '=', userId);
     }
-    final order = await query.first();
-    if (order == null) return null;
+    final orderMap = await q.first();
+    if (orderMap == null) return null;
 
-    final items = await OrderItem().query.where('order_id', '=', orderId).get();
+    final order = OrderDto.fromMap(orderMap);
+    final items =
+        await OrderItem().query.where('order_id', '=', order.id).get();
 
     return {
-      ...order,
+      ...orderMap,
       'items': items,
     };
   }
@@ -163,32 +173,34 @@ class OrderService {
     int page = 1,
     int perPage = 20,
   }) async {
-    QueryBuilder query = Order().query;
+    QueryBuilder q = Order().query;
     if (status != null && status.isNotEmpty) {
-      query = query.where('status', '=', status);
+      q = q.where('status', '=', status);
     }
 
     final allOrders = await Order().query.get();
     final total = allOrders.length;
 
     final offset = (page - 1) * perPage;
-    final orders = await query.orderBy('created_at', 'desc').limit(perPage).offset(offset).get();
+    final orderMaps = await q
+        .orderBy('created_at', 'desc')
+        .limit(perPage)
+        .offset(offset)
+        .get();
 
     final result = <Map<String, dynamic>>[];
-    for (final order in orders) {
-      final items = await OrderItem().query.where('order_id', '=', order['id']).get();
+    for (final orderMap in orderMaps) {
+      final order = OrderDto.fromMap(orderMap);
+      final items =
+          await OrderItem().query.where('order_id', '=', order.id).get();
 
-      final user = await User().query.where('id', '=', order['user_id']).first();
+      final user = await User().findById(order.userId);
 
       result.add({
-        ...order,
+        ...orderMap,
         'items': items,
         'user': user != null
-            ? {
-                'id': user['id'],
-                'name': user['name'],
-                'email': user['email'],
-              }
+            ? {'id': user.id, 'name': user.name, 'email': user.email}
             : null,
       });
     }
@@ -205,20 +217,21 @@ class OrderService {
   }
 
   /// Sipariş durumunu güncelle (admin)
-  Future<Map<String, dynamic>> updateOrderStatus(int orderId, String status) async {
+  Future<Map<String, dynamic>> updateOrderStatus(
+      int orderId, String status) async {
     if (!validStatuses.contains(status)) {
-      throw Exception('Invalid status. Valid statuses: ${validStatuses.join(', ')}');
+      throw Exception(
+          'Invalid status. Valid statuses: ${validStatuses.join(', ')}');
     }
 
-    final order = await Order().query.where('id', '=', orderId).first();
+    final order = await Order().findById(orderId);
     if (order == null) {
       throw Exception('Order not found');
     }
 
-    // Durum geçiş kuralları
-    final currentStatus = order['status'].toString();
-    if (!_isValidTransition(currentStatus, status)) {
-      throw Exception('Cannot transition from "$currentStatus" to "$status"');
+    if (!_isValidTransition(order.status, status)) {
+      throw Exception(
+          'Cannot transition from "${order.status}" to "$status"');
     }
 
     await Order().query.where('id', '=', orderId).update({
@@ -226,10 +239,10 @@ class OrderService {
       'updated_at': DateTime.now().toIso8601String(),
     });
 
-    // Kullanıcıya bilgi gönder
-    final user = await User().query.where('id', '=', order['user_id']).first();
+    final user = await User().findById(order.userId);
     if (user != null) {
-      await _emailService.sendOrderStatusUpdateEmail(user['email'].toString(), order['order_number'].toString(), status);
+      await _emailService.sendOrderStatusUpdateEmail(
+          user.email, order.orderNumber, status);
     }
 
     return (await getOrderById(orderId))!;

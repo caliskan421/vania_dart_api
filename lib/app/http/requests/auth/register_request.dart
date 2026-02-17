@@ -7,9 +7,9 @@ class RegisterRequest extends BaseRequest {
   Map<String, String> rules() {
     return {
       'name': 'required|string|min_length:2|max_length:100',
-      'email': 'required|email',
-      'password': 'required|string|min_length:8|confirmed',
-      'phone': 'nullable|string',
+      'email': 'required|email|unique_email',
+      'password': 'required|string|min_length:8|confirmed|strong_password',
+      'phone': 'nullable|string|turkish_phone',
     };
   }
 

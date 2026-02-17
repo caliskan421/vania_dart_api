@@ -20,13 +20,13 @@ library;
 
 /// Desteklenen alan tipleri (Dart / SQL karşılıkları)
 enum FieldType {
-  integer,    // int
+  integer, // int
   bigInteger, // int (bigint)
-  double_,    // double
-  string,     // String
-  boolean,    // bool
-  dateTime,   // DateTime
-  json,       // Map<String, dynamic>
+  double_, // double
+  string, // String
+  boolean, // bool
+  dateTime, // DateTime
+  json, // Map<String, dynamic>
 }
 
 /// Tek bir alanın tanımı
@@ -40,13 +40,13 @@ class FieldDef {
   /// Dart tip adı (nullable ise sona `?` eklenir)
   String get dartType {
     final base = switch (type) {
-      FieldType.integer    => 'int',
+      FieldType.integer => 'int',
       FieldType.bigInteger => 'int',
-      FieldType.double_    => 'double',
-      FieldType.string     => 'String',
-      FieldType.boolean    => 'bool',
-      FieldType.dateTime   => 'DateTime',
-      FieldType.json       => 'Map<String, dynamic>',
+      FieldType.double_ => 'double',
+      FieldType.string => 'String',
+      FieldType.boolean => 'bool',
+      FieldType.dateTime => 'DateTime',
+      FieldType.json => 'Map<String, dynamic>',
     };
     return nullable ? '$base?' : base;
   }
@@ -55,16 +55,26 @@ class FieldDef {
   /// Örn: `discount_price` → `discountPrice`
   String get camelName {
     final parts = name.split('_');
-    return parts.first +
-        parts.skip(1).map((w) => '${w[0].toUpperCase()}${w.substring(1)}').join();
+    return parts.first + parts.skip(1).map((w) => '${w[0].toUpperCase()}${w.substring(1)}').join();
   }
 }
 
 /// Model sınıflarına eklenen mixin.
 /// [schema] override edilerek alan tanımları belirtilir.
 /// `fillable` listesi schema'dan otomatik türetilir.
+/// fillable override etsen mixin'i ezerdin — ama artık gerek yok, schema tek kaynak of truth.
+///
+/// NOT: fillable getter'ı mutlaka cache'lenmiş (aynı referanslı) bir liste döndürmeli.
+/// Vania'nın _validateFieldsForAssignment metodu fillable listesine .add() ile
+/// created_at/updated_at/deleted_at ekler. Eğer getter her çağrıda yeni liste döndürürse
+/// bu eklemeler kaybolur ve insert/update işlemleri InvalidArgumentException fırlatır.
 mixin DtoSchema {
   List<FieldDef> get schema;
 
-  List<String> get fillable => schema.map((f) => f.name).toList();
+  List<String>? _fillableCache;
+
+  List<String> get fillable {
+    _fillableCache ??= schema.map((f) => f.name).toList();
+    return _fillableCache!;
+  }
 }

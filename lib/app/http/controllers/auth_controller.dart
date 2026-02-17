@@ -9,6 +9,7 @@ import 'package:vania/authentication.dart';
 import 'package:vania/http/controller.dart';
 import 'package:vania/http/request.dart';
 import 'package:vania/http/response.dart';
+import 'package:vania/src/exception/invalid_argument_exception.dart';
 import 'package:vania/vania.dart';
 
 class AuthController extends Controller {
@@ -33,6 +34,18 @@ class AuthController extends Controller {
         'message': 'Validation failed',
         'errors': e.message,
       }, 422);
+    } on InvalidArgumentException catch (e) {
+      return Response.json({
+        'success': false,
+        'message': 'Validation failed',
+        'errors': e.message,
+      }, 422);
+    } catch (e) {
+      return Response.json({
+        'success': false,
+        'message': 'Validation failed',
+        'errors': e.toString().replaceFirst('Exception: ', ''),
+      }, 422);
     }
 
     try {
@@ -48,11 +61,21 @@ class AuthController extends Controller {
         'message': 'Registration successful',
         'data': user,
       }, 201);
+    } on InvalidArgumentException catch (e) {
+      return Response.json({
+        'success': false,
+        'message': e.message,
+      }, 400);
+    } on Exception catch (e) {
+      return Response.json({
+        'success': false,
+        'message': e.toString().replaceFirst('Exception: ', ''),
+      }, 400);
     } catch (e) {
       return Response.json({
         'success': false,
         'message': e.toString(),
-      }, 400);
+      }, 500);
     }
   }
 
@@ -61,6 +84,12 @@ class AuthController extends Controller {
     try {
       await LoginRequest().validate(request);
     } on ValidationException catch (e) {
+      return Response.json({
+        'success': false,
+        'message': 'Validation failed',
+        'errors': e.message,
+      }, 422);
+    } on InvalidArgumentException catch (e) {
       return Response.json({
         'success': false,
         'message': 'Validation failed',
@@ -79,6 +108,11 @@ class AuthController extends Controller {
         'message': 'Login successful',
         'data': result,
       }, 200);
+    } on InvalidArgumentException catch (e) {
+      return Response.json({
+        'success': false,
+        'message': e.message,
+      }, 400);
     } on Exception catch (e) {
       final message = e.toString().replaceFirst('Exception: ', '');
       final statusCode = message.contains('not found') ? 404 : 401;
@@ -99,6 +133,12 @@ class AuthController extends Controller {
         'message': 'Validation failed',
         'errors': e.message,
       }, 422);
+    } on InvalidArgumentException catch (e) {
+      return Response.json({
+        'success': false,
+        'message': 'Validation failed',
+        'errors': e.message,
+      }, 422);
     }
 
     try {
@@ -108,6 +148,11 @@ class AuthController extends Controller {
         'success': true,
         'message': 'Password reset link has been sent to your email (simulated)',
       }, 200);
+    } on InvalidArgumentException catch (e) {
+      return Response.json({
+        'success': false,
+        'message': e.message,
+      }, 400);
     } on Exception catch (e) {
       final message = e.toString().replaceFirst('Exception: ', '');
       return Response.json({
@@ -127,6 +172,12 @@ class AuthController extends Controller {
         'message': 'Validation failed',
         'errors': e.message,
       }, 422);
+    } on InvalidArgumentException catch (e) {
+      return Response.json({
+        'success': false,
+        'message': 'Validation failed',
+        'errors': e.message,
+      }, 422);
     }
 
     try {
@@ -140,6 +191,11 @@ class AuthController extends Controller {
         'success': true,
         'message': 'Password reset successful',
       }, 200);
+    } on InvalidArgumentException catch (e) {
+      return Response.json({
+        'success': false,
+        'message': e.message,
+      }, 400);
     } on Exception catch (e) {
       final message = e.toString().replaceFirst('Exception: ', '');
       return Response.json({
@@ -190,6 +246,12 @@ class AuthController extends Controller {
         'message': 'Validation failed',
         'errors': e.message,
       }, 422);
+    } on InvalidArgumentException catch (e) {
+      return Response.json({
+        'success': false,
+        'message': 'Validation failed',
+        'errors': e.message,
+      }, 422);
     }
 
     try {
@@ -212,6 +274,11 @@ class AuthController extends Controller {
         'message': 'Profile updated successfully',
         'data': user,
       }, 200);
+    } on InvalidArgumentException catch (e) {
+      return Response.json({
+        'success': false,
+        'message': e.message,
+      }, 400);
     } on Exception catch (e) {
       final message = e.toString().replaceFirst('Exception: ', '');
       return Response.json({

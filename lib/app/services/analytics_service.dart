@@ -1,3 +1,5 @@
+import 'package:first_vania_project/app/dto/order_dto.dart';
+import 'package:first_vania_project/app/dto/order_item_dto.dart';
 import 'package:first_vania_project/app/models/order.dart';
 import 'package:first_vania_project/app/models/order_item.dart';
 import 'package:first_vania_project/app/models/product.dart';
@@ -38,25 +40,31 @@ class AnalyticsService {
   }
 
   Future<double> _getTotalRevenue() async {
-    final orders = await Order()
-        .query
-        .where('status', '!=', 'cancelled')
-        .get();
+    final orderMaps =
+        await Order().query.where('status', '!=', 'cancelled').get();
 
     double total = 0;
-    for (final order in orders) {
-      total += (order['total_amount'] as num).toDouble();
+    for (final map in orderMaps) {
+      final order = OrderDto.fromMap(map);
+      total += order.totalAmount;
     }
     return double.parse(total.toStringAsFixed(2));
   }
 
   Future<int> _getTotalProducts() async {
-    final products = await Product().query.where('is_active', '=', true).get();
+    final products =
+        await Product().query.where('is_active', '=', true).get();
     return products.length;
   }
 
   Future<Map<String, int>> _getOrdersByStatus() async {
-    final statuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+    final statuses = [
+      'pending',
+      'processing',
+      'shipped',
+      'delivered',
+      'cancelled'
+    ];
     final result = <String, int>{};
 
     for (final status in statuses) {
@@ -70,37 +78,33 @@ class AnalyticsService {
 
   Future<List<Map<String, dynamic>>> _getPopularProducts(
       {int limit = 10}) async {
-    // Sipariş kalemlerinden popüler ürünleri hesapla
-    final allOrderItems = await OrderItem().query.get();
+    final allOrderItemMaps = await OrderItem().query.get();
 
     final productSales = <int, int>{};
     final productRevenue = <int, double>{};
 
-    for (final item in allOrderItems) {
-      final productId = item['product_id'] as int;
-      final qty = item['quantity'] as int;
-      final totalPrice = (item['total_price'] as num).toDouble();
+    for (final map in allOrderItemMaps) {
+      final item = OrderItemDto.fromMap(map);
 
-      productSales[productId] = (productSales[productId] ?? 0) + qty;
-      productRevenue[productId] =
-          (productRevenue[productId] ?? 0) + totalPrice;
+      productSales[item.productId] =
+          (productSales[item.productId] ?? 0) + item.quantity;
+      productRevenue[item.productId] =
+          (productRevenue[item.productId] ?? 0) + item.totalPrice;
     }
 
-    // Satışa göre sırala
     final sortedProducts = productSales.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
 
     final result = <Map<String, dynamic>>[];
     for (final entry in sortedProducts.take(limit)) {
-      final product =
-          await Product().query.where('id', '=', entry.key).first();
+      final product = await Product().findById(entry.key);
       if (product != null) {
         result.add({
           'product_id': entry.key,
-          'product_name': product['name'],
+          'product_name': product.name,
           'total_sold': entry.value,
-          'total_revenue':
-              double.parse((productRevenue[entry.key] ?? 0).toStringAsFixed(2)),
+          'total_revenue': double.parse(
+              (productRevenue[entry.key] ?? 0).toStringAsFixed(2)),
         });
       }
     }
@@ -110,26 +114,24 @@ class AnalyticsService {
 
   Future<List<Map<String, dynamic>>> _getRecentOrders(
       {int limit = 5}) async {
-    final orders = await Order()
+    final orderMaps = await Order()
         .query
         .orderBy('created_at', 'desc')
         .limit(limit)
         .get();
 
     final result = <Map<String, dynamic>>[];
-    for (final order in orders) {
-      final user = await User()
-          .query
-          .where('id', '=', order['user_id'])
-          .first();
+    for (final map in orderMaps) {
+      final order = OrderDto.fromMap(map);
+      final user = await User().findById(order.userId);
 
       result.add({
-        'order_number': order['order_number'],
-        'status': order['status'],
-        'total_amount': order['total_amount'],
-        'user_name': user?['name'],
-        'user_email': user?['email'],
-        'created_at': order['created_at']?.toString(),
+        'order_number': order.orderNumber,
+        'status': order.status,
+        'total_amount': order.totalAmount,
+        'user_name': user?.name,
+        'user_email': user?.email,
+        'created_at': map['created_at']?.toString(),
       });
     }
 

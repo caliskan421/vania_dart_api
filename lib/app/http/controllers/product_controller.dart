@@ -5,6 +5,7 @@ import 'package:first_vania_project/app/services/file_upload_service.dart';
 import 'package:vania/http/controller.dart';
 import 'package:vania/http/request.dart';
 import 'package:vania/http/response.dart';
+import 'package:vania/src/exception/invalid_argument_exception.dart';
 import 'package:vania/vania.dart';
 
 class ProductController extends Controller {
@@ -101,6 +102,11 @@ class ProductController extends Controller {
         'message': 'Product created successfully',
         'data': product,
       }, 201);
+    } on InvalidArgumentException catch (e) {
+      return Response.json({
+        'success': false,
+        'message': e.message,
+      }, 400);
     } on Exception catch (e) {
       final message = e.toString().replaceFirst('Exception: ', '');
       return Response.json({
@@ -140,6 +146,11 @@ class ProductController extends Controller {
         'message': 'Product updated successfully',
         'data': product,
       }, 200);
+    } on InvalidArgumentException catch (e) {
+      return Response.json({
+        'success': false,
+        'message': e.message,
+      }, 400);
     } on Exception catch (e) {
       final message = e.toString().replaceFirst('Exception: ', '');
       return Response.json({
@@ -159,6 +170,11 @@ class ProductController extends Controller {
         'success': true,
         'message': 'Product deleted successfully',
       }, 200);
+    } on InvalidArgumentException catch (e) {
+      return Response.json({
+        'success': false,
+        'message': e.message,
+      }, 400);
     } on Exception catch (e) {
       final message = e.toString().replaceFirst('Exception: ', '');
       return Response.json({
@@ -183,7 +199,6 @@ class ProductController extends Controller {
 
       final isPrimary = request.input('is_primary') == true || request.input('is_primary') == 'true';
 
-      // Dosya uzantısını kontrol et
       final extension = file.extension;
       if (!_fileService.isAllowedImageExtension(extension)) {
         return Response.json({
@@ -192,13 +207,11 @@ class ProductController extends Controller {
         }, 422);
       }
 
-      // Dosyayı public dizine taşı
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final filename = 'product_${productId}_$timestamp.$extension';
       await file.move(toPath: 'public/products', name: filename);
       final imageUrl = '/products/$filename';
 
-      // Veritabanına kaydet
       final image = await _service.addProductImage(
         productId,
         imageUrl,
@@ -210,6 +223,11 @@ class ProductController extends Controller {
         'message': 'Image uploaded successfully',
         'data': image,
       }, 201);
+    } on InvalidArgumentException catch (e) {
+      return Response.json({
+        'success': false,
+        'message': e.message,
+      }, 400);
     } on Exception catch (e) {
       final message = e.toString().replaceFirst('Exception: ', '');
       return Response.json({

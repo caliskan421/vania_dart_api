@@ -1,3 +1,4 @@
+import 'package:first_vania_project/app/dto/product_dto.dart';
 import 'package:first_vania_project/app/models/product.dart';
 import 'package:first_vania_project/app/models/product_image.dart';
 import 'package:first_vania_project/app/models/category.dart';
@@ -32,36 +33,32 @@ class ProductService {
       query = query.where('price', '<=', maxPrice);
     }
 
-    // Toplam sayı için ayrı sorgu
     final allResults = await Product().query.where('is_active', '=', true).get();
     int totalFiltered = allResults.length;
 
     final offset = (page - 1) * perPage;
-    final products = await query
-        .orderBy(sortBy, sortOrder)
-        .limit(perPage)
-        .offset(offset)
-        .get();
+    final productMaps = await query.orderBy(sortBy, sortOrder).limit(perPage).offset(offset).get();
 
-    // Her ürüne resimlerini ekle
     final productList = <Map<String, dynamic>>[];
-    for (final product in products) {
+    for (final productMap in productMaps) {
+      final product = ProductDto.fromMap(productMap);
+
       final images = await ProductImage()
           .query
-          .where('product_id', '=', product['id'])
+          .where('product_id', '=', product.id)
           .orderBy('sort_order', 'asc')
           .get();
 
       Map<String, dynamic>? categoryData;
-      if (product['category_id'] != null) {
+      if (product.categoryId != null) {
         categoryData = await Category()
             .query
-            .where('id', '=', product['category_id'])
+            .where('id', '=', product.categoryId)
             .first();
       }
 
       productList.add({
-        ...product,
+        ...productMap,
         'images': images,
         'category': categoryData,
       });
@@ -80,41 +77,37 @@ class ProductService {
 
   /// Tek ürün detayı
   Future<Map<String, dynamic>?> getProductById(int id) async {
-    final product = await Product().query.where('id', '=', id).first();
-    if (product == null) return null;
+    final productMap = await Product().query.where('id', '=', id).first();
+    if (productMap == null) return null;
+    final product = ProductDto.fromMap(productMap);
 
     final images = await ProductImage()
         .query
-        .where('product_id', '=', id)
+        .where('product_id', '=', product.id)
         .orderBy('sort_order', 'asc')
         .get();
 
     Map<String, dynamic>? categoryData;
-    if (product['category_id'] != null) {
+    if (product.categoryId != null) {
       categoryData = await Category()
           .query
-          .where('id', '=', product['category_id'])
+          .where('id', '=', product.categoryId)
           .first();
     }
 
     return {
-      ...product,
+      ...productMap,
       'images': images,
       'category': categoryData,
     };
   }
 
   /// Yeni ürün oluştur
-  Future<Map<String, dynamic>> createProduct(
-      Map<String, dynamic> data) async {
+  Future<Map<String, dynamic>> createProduct(Map<String, dynamic> data) async {
     final slug = _generateSlug(data['name'].toString());
 
-    // Kategori kontrolü
     if (data['category_id'] != null) {
-      final category = await Category()
-          .query
-          .where('id', '=', data['category_id'])
-          .first();
+      final category = await Category().findById((data['category_id'] as num).toInt());
       if (category == null) {
         throw Exception('Category not found');
       }
@@ -139,9 +132,8 @@ class ProductService {
   }
 
   /// Ürünü güncelle
-  Future<Map<String, dynamic>> updateProduct(
-      int id, Map<String, dynamic> data) async {
-    final product = await Product().query.where('id', '=', id).first();
+  Future<Map<String, dynamic>> updateProduct(int id, Map<String, dynamic> data) async {
+    final product = await Product().findById(id);
     if (product == null) {
       throw Exception('Product not found');
     }
@@ -177,7 +169,7 @@ class ProductService {
 
   /// Ürünü sil (soft delete)
   Future<void> deleteProduct(int id) async {
-    final product = await Product().query.where('id', '=', id).first();
+    final product = await Product().findById(id);
     if (product == null) {
       throw Exception('Product not found');
     }
@@ -189,22 +181,18 @@ class ProductService {
   }
 
   /// Ürüne resim ekle
-  Future<Map<String, dynamic>> addProductImage(
-      int productId, String imageUrl, {bool isPrimary = false}) async {
-    final product =
-        await Product().query.where('id', '=', productId).first();
+  Future<Map<String, dynamic>> addProductImage(int productId, String imageUrl, {bool isPrimary = false}) async {
+    final product = await Product().findById(productId);
     if (product == null) {
       throw Exception('Product not found');
     }
 
-    // Mevcut resimlerin sayısını al (sıralama için)
     final existingImages = await ProductImage()
         .query
         .where('product_id', '=', productId)
         .get();
     final sortOrder = existingImages.length;
 
-    // Eğer primary olarak işaretlenecekse, önceki primary'yi kaldır
     if (isPrimary) {
       await ProductImage()
           .query
@@ -213,7 +201,6 @@ class ProductService {
           .update({'is_primary': false});
     }
 
-    // İlk resimse otomatik primary yap
     if (existingImages.isEmpty) {
       isPrimary = true;
     }
@@ -237,18 +224,16 @@ class ProductService {
 
   /// Stok kontrolü
   Future<bool> checkStock(int productId, int quantity) async {
-    final product =
-        await Product().query.where('id', '=', productId).first();
+    final product = await Product().findById(productId);
     if (product == null) return false;
-    return (product['stock'] as int) >= quantity;
+    return product.stock >= quantity;
   }
 
   /// Stok azalt
   Future<void> decreaseStock(int productId, int quantity) async {
-    final product =
-        await Product().query.where('id', '=', productId).first();
+    final product = await Product().findById(productId);
     if (product == null) throw Exception('Product not found');
-    final newStock = (product['stock'] as int) - quantity;
+    final newStock = product.stock - quantity;
     if (newStock < 0) throw Exception('Insufficient stock');
     await Product().query.where('id', '=', productId).update({
       'stock': newStock,

@@ -5,6 +5,7 @@ import 'package:vania/authentication.dart';
 import 'package:vania/http/controller.dart';
 import 'package:vania/http/request.dart';
 import 'package:vania/http/response.dart';
+import 'package:vania/src/exception/invalid_argument_exception.dart';
 import 'package:vania/vania.dart';
 
 class CartController extends Controller {
@@ -74,6 +75,11 @@ class CartController extends Controller {
         'message': 'Item added to cart',
         'data': cart,
       }, 200);
+    } on InvalidArgumentException catch (e) {
+      return Response.json({
+        'success': false,
+        'message': e.message,
+      }, 400);
     } on Exception catch (e) {
       final message = e.toString().replaceFirst('Exception: ', '');
       return Response.json({
@@ -114,6 +120,11 @@ class CartController extends Controller {
         'message': 'Cart item updated',
         'data': cart,
       }, 200);
+    } on InvalidArgumentException catch (e) {
+      return Response.json({
+        'success': false,
+        'message': e.message,
+      }, 400);
     } on Exception catch (e) {
       final message = e.toString().replaceFirst('Exception: ', '');
       return Response.json({
@@ -142,6 +153,11 @@ class CartController extends Controller {
         'message': 'Item removed from cart',
         'data': cart,
       }, 200);
+    } on InvalidArgumentException catch (e) {
+      return Response.json({
+        'success': false,
+        'message': e.message,
+      }, 400);
     } on Exception catch (e) {
       final message = e.toString().replaceFirst('Exception: ', '');
       return Response.json({

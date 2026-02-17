@@ -4,6 +4,7 @@ import 'package:first_vania_project/app/services/category_service.dart';
 import 'package:vania/http/controller.dart';
 import 'package:vania/http/request.dart';
 import 'package:vania/http/response.dart';
+import 'package:vania/src/exception/invalid_argument_exception.dart';
 import 'package:vania/vania.dart';
 
 class CategoryController extends Controller {
@@ -76,6 +77,11 @@ class CategoryController extends Controller {
         'message': 'Category created successfully',
         'data': category,
       }, 201);
+    } on InvalidArgumentException catch (e) {
+      return Response.json({
+        'success': false,
+        'message': e.message,
+      }, 400);
     } on Exception catch (e) {
       final message = e.toString().replaceFirst('Exception: ', '');
       return Response.json({
@@ -111,6 +117,11 @@ class CategoryController extends Controller {
         'message': 'Category updated successfully',
         'data': category,
       }, 200);
+    } on InvalidArgumentException catch (e) {
+      return Response.json({
+        'success': false,
+        'message': e.message,
+      }, 400);
     } on Exception catch (e) {
       final message = e.toString().replaceFirst('Exception: ', '');
       return Response.json({
@@ -130,6 +141,11 @@ class CategoryController extends Controller {
         'success': true,
         'message': 'Category deleted successfully',
       }, 200);
+    } on InvalidArgumentException catch (e) {
+      return Response.json({
+        'success': false,
+        'message': e.message,
+      }, 400);
     } on Exception catch (e) {
       final message = e.toString().replaceFirst('Exception: ', '');
       return Response.json({

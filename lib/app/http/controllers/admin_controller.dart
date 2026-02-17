@@ -5,6 +5,7 @@ import 'package:first_vania_project/app/services/user_service.dart';
 import 'package:vania/http/controller.dart';
 import 'package:vania/http/request.dart';
 import 'package:vania/http/response.dart';
+import 'package:vania/src/exception/invalid_argument_exception.dart';
 import 'package:vania/vania.dart';
 
 class AdminController extends Controller {
@@ -76,6 +77,11 @@ class AdminController extends Controller {
         'success': true,
         'message': 'User deleted successfully',
       }, 200);
+    } on InvalidArgumentException catch (e) {
+      return Response.json({
+        'success': false,
+        'message': e.message,
+      }, 400);
     } on Exception catch (e) {
       final message = e.toString().replaceFirst('Exception: ', '');
       return Response.json({
@@ -136,6 +142,11 @@ class AdminController extends Controller {
         'message': 'Order status updated successfully',
         'data': order,
       }, 200);
+    } on InvalidArgumentException catch (e) {
+      return Response.json({
+        'success': false,
+        'message': e.message,
+      }, 400);
     } on Exception catch (e) {
       final message = e.toString().replaceFirst('Exception: ', '');
       return Response.json({

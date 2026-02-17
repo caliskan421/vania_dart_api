@@ -39,8 +39,9 @@ class CategoryService {
   }
 
   /// Kategoriyi güncelle
-  Future<Map<String, dynamic>> updateCategory(int id, Map<String, dynamic> data) async {
-    final category = await Category().query.where('id', '=', id).first();
+  Future<Map<String, dynamic>> updateCategory(
+      int id, Map<String, dynamic> data) async {
+    final category = await Category().findById(id);
     if (category == null) {
       throw Exception('Category not found');
     }
@@ -70,7 +71,7 @@ class CategoryService {
 
   /// Kategoriyi sil
   Future<void> deleteCategory(int id) async {
-    final category = await Category().query.where('id', '=', id).first();
+    final category = await Category().findById(id);
     if (category == null) {
       throw Exception('Category not found');
     }
