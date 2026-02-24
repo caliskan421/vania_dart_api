@@ -22,13 +22,10 @@ RUN dart pub get --offline
 # Migration build sırasında DB bağlantısı gerektirir - Railway'de deploy sonrası ayrı çalıştırılır
 RUN vania build
 
-# Build minimal serving image from AOT-compiled `/server`
-# and the pre-built AOT-runtime in the `/runtime/` directory of the base image.
-# Use debian-slim for shell support (Railway PORT env var needs runtime expansion)
+# Use debian-slim for shell support (Railway PORT env var)
 FROM debian:bookworm-slim
 
-# Comment the following line if you are not serving static files.
-COPY --from=build /runtime/ /
+# dart compile exe standalone binary üretir - /runtime/ gerekmez
 COPY --from=build /app/bin/server /bin/server
 # .env kopyalanmaz - Railway env variables kullanılır (güvenlik)
 COPY --from=build /app/public /public/
