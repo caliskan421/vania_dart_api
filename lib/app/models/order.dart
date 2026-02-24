@@ -8,19 +8,19 @@ class Order extends Model with DtoSchema {
 
   @override
   List<FieldDef> get schema => [
-    FieldDef('user_id', FieldType.integer),
-    FieldDef('order_number', FieldType.string),
-    FieldDef('status', FieldType.string),
-    FieldDef('subtotal', FieldType.double_),
-    FieldDef('tax_amount', FieldType.double_),
-    FieldDef('shipping_cost', FieldType.double_),
-    FieldDef('total_amount', FieldType.double_),
-    FieldDef('shipping_address', FieldType.string, nullable: true),
-    FieldDef('shipping_city', FieldType.string, nullable: true),
-    FieldDef('shipping_phone', FieldType.string, nullable: true),
-    FieldDef('notes', FieldType.string, nullable: true),
-    FieldDef('invoice_path', FieldType.string, nullable: true),
-  ];
+        FieldDef('user_id', FieldType.integer),
+        FieldDef('order_number', FieldType.string),
+        FieldDef('status', FieldType.string),
+        FieldDef('subtotal', FieldType.double_),
+        FieldDef('tax_amount', FieldType.double_),
+        FieldDef('shipping_cost', FieldType.double_),
+        FieldDef('total_amount', FieldType.double_),
+        FieldDef('shipping_address', FieldType.string, nullable: true),
+        FieldDef('shipping_city', FieldType.string, nullable: true),
+        FieldDef('shipping_phone', FieldType.string, nullable: true),
+        FieldDef('notes', FieldType.string, nullable: true),
+        FieldDef('invoice_path', FieldType.string, nullable: true),
+      ];
 
   /// Tek kayıt — typed döner
   Future<OrderDto?> findById(int id) async {

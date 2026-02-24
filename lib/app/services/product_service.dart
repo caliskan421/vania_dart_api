@@ -43,18 +43,11 @@ class ProductService {
     for (final productMap in productMaps) {
       final product = ProductDto.fromMap(productMap);
 
-      final images = await ProductImage()
-          .query
-          .where('product_id', '=', product.id)
-          .orderBy('sort_order', 'asc')
-          .get();
+      final images = await ProductImage().query.where('product_id', '=', product.id).orderBy('sort_order', 'asc').get();
 
       Map<String, dynamic>? categoryData;
       if (product.categoryId != null) {
-        categoryData = await Category()
-            .query
-            .where('id', '=', product.categoryId)
-            .first();
+        categoryData = await Category().query.where('id', '=', product.categoryId).first();
       }
 
       productList.add({
@@ -81,18 +74,11 @@ class ProductService {
     if (productMap == null) return null;
     final product = ProductDto.fromMap(productMap);
 
-    final images = await ProductImage()
-        .query
-        .where('product_id', '=', product.id)
-        .orderBy('sort_order', 'asc')
-        .get();
+    final images = await ProductImage().query.where('product_id', '=', product.id).orderBy('sort_order', 'asc').get();
 
     Map<String, dynamic>? categoryData;
     if (product.categoryId != null) {
-      categoryData = await Category()
-          .query
-          .where('id', '=', product.categoryId)
-          .first();
+      categoryData = await Category().query.where('id', '=', product.categoryId).first();
     }
 
     return {
@@ -187,18 +173,11 @@ class ProductService {
       throw Exception('Product not found');
     }
 
-    final existingImages = await ProductImage()
-        .query
-        .where('product_id', '=', productId)
-        .get();
+    final existingImages = await ProductImage().query.where('product_id', '=', productId).get();
     final sortOrder = existingImages.length;
 
     if (isPrimary) {
-      await ProductImage()
-          .query
-          .where('product_id', '=', productId)
-          .where('is_primary', '=', true)
-          .update({'is_primary': false});
+      await ProductImage().query.where('product_id', '=', productId).where('is_primary', '=', true).update({'is_primary': false});
     }
 
     if (existingImages.isEmpty) {
@@ -214,11 +193,7 @@ class ProductService {
       'updated_at': DateTime.now().toIso8601String(),
     });
 
-    final image = await ProductImage()
-        .query
-        .where('product_id', '=', productId)
-        .where('image_url', '=', imageUrl)
-        .first();
+    final image = await ProductImage().query.where('product_id', '=', productId).where('image_url', '=', imageUrl).first();
     return image!;
   }
 

@@ -36,6 +36,7 @@ class PasswordResetDto {
       'expires_at': expiresAt.toIso8601String(),
     };
   }
+
   /// Token süresi dolmuş mu?
   bool get isExpired => DateTime.now().isAfter(expiresAt);
 
@@ -45,6 +46,7 @@ class PasswordResetDto {
     final s = v.toString().trim().toLowerCase();
     return s == '1' || s == 'true';
   }
+
   static int _parseInt(dynamic v) {
     if (v is int) return v;
     if (v is num) return v.toInt();

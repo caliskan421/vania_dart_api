@@ -10,8 +10,7 @@ class CreateProductImagesTable extends Migration {
       table.boolean('is_primary');
       table.integer('sort_order');
       table.timeStamps();
-      table.foreign('product_id', 'products', 'id',
-          constrained: true, onDelete: 'CASCADE');
+      table.foreign('product_id', 'products', 'id', constrained: true, onDelete: 'CASCADE');
     });
   }
 

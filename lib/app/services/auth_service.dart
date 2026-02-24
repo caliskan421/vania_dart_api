@@ -29,8 +29,7 @@ class AuthService {
 
     final user = await User().findByEmail(data['email'].toString());
 
-    await _emailService.sendWelcomeEmail(
-        data['email'].toString(), data['name'].toString());
+    await _emailService.sendWelcomeEmail(data['email'].toString(), data['name'].toString());
 
     return user!.toSanitizedMap();
   }
@@ -74,11 +73,7 @@ class AuthService {
     final verifyCode = _generateResetCode();
 
     // Eski tokenları geçersiz kıl
-    await PasswordReset()
-        .query
-        .where('email', '=', email)
-        .where('is_used', '=', false)
-        .update({
+    await PasswordReset().query.where('email', '=', email).where('is_used', '=', false).update({
       'is_used': true,
       'updated_at': DateTime.now().toIso8601String(),
     });
@@ -97,8 +92,7 @@ class AuthService {
   }
 
   /// Şifre sıfırlama işlemi
-  Future<void> resetPassword(
-      String email, String token, String newPassword) async {
+  Future<void> resetPassword(String email, String token, String newPassword) async {
     final resetRecord = await PasswordReset().findActiveByEmail(email);
 
     if (resetRecord == null) {
@@ -119,10 +113,7 @@ class AuthService {
       'updated_at': DateTime.now().toIso8601String(),
     });
 
-    await PasswordReset()
-        .query
-        .where('id', '=', resetRecord.id)
-        .update({
+    await PasswordReset().query.where('id', '=', resetRecord.id).update({
       'is_used': true,
       'updated_at': DateTime.now().toIso8601String(),
     });
@@ -131,8 +122,7 @@ class AuthService {
   /// Şifre sıfırlama token'ını üretir.
   String _generateResetCode() {
     final random = Random.secure();
-    const chars =
-        'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     return List.generate(64, (_) => chars[random.nextInt(chars.length)]).join();
   }
 }

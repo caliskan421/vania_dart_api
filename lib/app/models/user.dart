@@ -8,14 +8,14 @@ class User extends Model with DtoSchema {
 
   @override
   List<FieldDef> get schema => [
-    FieldDef('name', FieldType.string),
-    FieldDef('email', FieldType.string),
-    FieldDef('password', FieldType.string),
-    FieldDef('phone', FieldType.string, nullable: true),
-    FieldDef('role', FieldType.string),
-    FieldDef('avatar_url', FieldType.string, nullable: true),
-    FieldDef('address', FieldType.string, nullable: true),
-  ];
+        FieldDef('name', FieldType.string),
+        FieldDef('email', FieldType.string),
+        FieldDef('password', FieldType.string),
+        FieldDef('phone', FieldType.string, nullable: true),
+        FieldDef('role', FieldType.string),
+        FieldDef('avatar_url', FieldType.string, nullable: true),
+        FieldDef('address', FieldType.string, nullable: true),
+      ];
 
   /// Tek kayıt — typed döner
   Future<UserDto?> findById(int id) async {

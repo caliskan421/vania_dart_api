@@ -8,11 +8,11 @@ class PasswordReset extends Model with DtoSchema {
 
   @override
   List<FieldDef> get schema => [
-    FieldDef('email', FieldType.string),
-    FieldDef('token', FieldType.string),
-    FieldDef('is_used', FieldType.boolean),
-    FieldDef('expires_at', FieldType.dateTime),
-  ];
+        FieldDef('email', FieldType.string),
+        FieldDef('token', FieldType.string),
+        FieldDef('is_used', FieldType.boolean),
+        FieldDef('expires_at', FieldType.dateTime),
+      ];
 
   /// Tek kayıt — typed döner
   Future<PasswordResetDto?> findById(int id) async {
@@ -22,10 +22,7 @@ class PasswordReset extends Model with DtoSchema {
 
   /// E-posta ile aktif (kullanılmamış) reset kaydını bul
   Future<PasswordResetDto?> findActiveByEmail(String email) async {
-    final map = await query
-        .where('email', '=', email)
-        .where('is_used', '=', false)
-        .first();
+    final map = await query.where('email', '=', email).where('is_used', '=', false).first();
     return map != null ? PasswordResetDto.fromMap(map) : null;
   }
 }

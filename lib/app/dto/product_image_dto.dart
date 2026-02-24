@@ -36,12 +36,14 @@ class ProductImageDto {
       'sort_order': sortOrder,
     };
   }
+
   static bool _parseBool(dynamic v) {
     if (v is bool) return v;
     if (v is num) return v == 1;
     final s = v.toString().trim().toLowerCase();
     return s == '1' || s == 'true';
   }
+
   static int _parseInt(dynamic v) {
     if (v is int) return v;
     if (v is num) return v.toInt();

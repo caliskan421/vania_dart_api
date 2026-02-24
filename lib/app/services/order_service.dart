@@ -24,8 +24,7 @@ class OrderService {
   static const double shippingCost = 29.90;
 
   /// Sepetten sipariş oluştur
-  Future<Map<String, dynamic>> createOrderFromCart(
-      int userId, Map<String, dynamic> shippingData) async {
+  Future<Map<String, dynamic>> createOrderFromCart(int userId, Map<String, dynamic> shippingData) async {
     final cart = await Cart().findByUserId(userId);
     if (cart == null) {
       throw Exception('Cart is empty');
@@ -47,8 +46,7 @@ class OrderService {
       }
 
       if (product.stock < item.quantity) {
-        throw Exception(
-            'Insufficient stock for ${product.name}. Available: ${product.stock}');
+        throw Exception('Insufficient stock for ${product.name}. Available: ${product.stock}');
       }
 
       final totalPrice = item.unitPrice * item.quantity;
@@ -64,8 +62,7 @@ class OrderService {
     }
 
     final taxAmount = double.parse((subtotal * taxRate).toStringAsFixed(2));
-    final totalAmount =
-        double.parse((subtotal + taxAmount + shippingCost).toStringAsFixed(2));
+    final totalAmount = double.parse((subtotal + taxAmount + shippingCost).toStringAsFixed(2));
     final orderNumber = _generateOrderNumber();
 
     await Order().query.insert({
@@ -115,30 +112,21 @@ class OrderService {
     // E-posta gönder
     final user = await User().findById(userId);
     if (user != null) {
-      await _emailService.sendOrderConfirmationEmail(
-          user.email, orderNumber, totalAmount);
+      await _emailService.sendOrderConfirmationEmail(user.email, orderNumber, totalAmount);
     }
 
     return await getOrderById(order!.id, userId: userId) ?? {};
   }
 
   /// Kullanıcının siparişlerini getir
-  Future<List<Map<String, dynamic>>> getUserOrders(int userId,
-      {int page = 1, int perPage = 20}) async {
+  Future<List<Map<String, dynamic>>> getUserOrders(int userId, {int page = 1, int perPage = 20}) async {
     final offset = (page - 1) * perPage;
-    final orderMaps = await Order()
-        .query
-        .where('user_id', '=', userId)
-        .orderBy('created_at', 'desc')
-        .limit(perPage)
-        .offset(offset)
-        .get();
+    final orderMaps = await Order().query.where('user_id', '=', userId).orderBy('created_at', 'desc').limit(perPage).offset(offset).get();
 
     final result = <Map<String, dynamic>>[];
     for (final orderMap in orderMaps) {
       final order = OrderDto.fromMap(orderMap);
-      final items =
-          await OrderItem().query.where('order_id', '=', order.id).get();
+      final items = await OrderItem().query.where('order_id', '=', order.id).get();
       result.add({
         ...orderMap,
         'items': items,
@@ -148,8 +136,7 @@ class OrderService {
   }
 
   /// Sipariş detayı getir
-  Future<Map<String, dynamic>?> getOrderById(int orderId,
-      {int? userId}) async {
+  Future<Map<String, dynamic>?> getOrderById(int orderId, {int? userId}) async {
     var q = Order().query.where('id', '=', orderId);
     if (userId != null) {
       q = q.where('user_id', '=', userId);
@@ -158,8 +145,7 @@ class OrderService {
     if (orderMap == null) return null;
 
     final order = OrderDto.fromMap(orderMap);
-    final items =
-        await OrderItem().query.where('order_id', '=', order.id).get();
+    final items = await OrderItem().query.where('order_id', '=', order.id).get();
 
     return {
       ...orderMap,
@@ -182,26 +168,19 @@ class OrderService {
     final total = allOrders.length;
 
     final offset = (page - 1) * perPage;
-    final orderMaps = await q
-        .orderBy('created_at', 'desc')
-        .limit(perPage)
-        .offset(offset)
-        .get();
+    final orderMaps = await q.orderBy('created_at', 'desc').limit(perPage).offset(offset).get();
 
     final result = <Map<String, dynamic>>[];
     for (final orderMap in orderMaps) {
       final order = OrderDto.fromMap(orderMap);
-      final items =
-          await OrderItem().query.where('order_id', '=', order.id).get();
+      final items = await OrderItem().query.where('order_id', '=', order.id).get();
 
       final user = await User().findById(order.userId);
 
       result.add({
         ...orderMap,
         'items': items,
-        'user': user != null
-            ? {'id': user.id, 'name': user.name, 'email': user.email}
-            : null,
+        'user': user != null ? {'id': user.id, 'name': user.name, 'email': user.email} : null,
       });
     }
 
@@ -217,11 +196,9 @@ class OrderService {
   }
 
   /// Sipariş durumunu güncelle (admin)
-  Future<Map<String, dynamic>> updateOrderStatus(
-      int orderId, String status) async {
+  Future<Map<String, dynamic>> updateOrderStatus(int orderId, String status) async {
     if (!validStatuses.contains(status)) {
-      throw Exception(
-          'Invalid status. Valid statuses: ${validStatuses.join(', ')}');
+      throw Exception('Invalid status. Valid statuses: ${validStatuses.join(', ')}');
     }
 
     final order = await Order().findById(orderId);
@@ -230,8 +207,7 @@ class OrderService {
     }
 
     if (!_isValidTransition(order.status, status)) {
-      throw Exception(
-          'Cannot transition from "${order.status}" to "$status"');
+      throw Exception('Cannot transition from "${order.status}" to "$status"');
     }
 
     await Order().query.where('id', '=', orderId).update({
@@ -241,8 +217,7 @@ class OrderService {
 
     final user = await User().findById(order.userId);
     if (user != null) {
-      await _emailService.sendOrderStatusUpdateEmail(
-          user.email, order.orderNumber, status);
+      await _emailService.sendOrderStatusUpdateEmail(user.email, order.orderNumber, status);
     }
 
     return (await getOrderById(orderId))!;

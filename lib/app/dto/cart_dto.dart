@@ -24,6 +24,7 @@ class CartDto {
       'user_id': userId,
     };
   }
+
   static int _parseInt(dynamic v) {
     if (v is int) return v;
     if (v is num) return v.toInt();

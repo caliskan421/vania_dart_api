@@ -7,8 +7,7 @@ class CreateCartsTable extends Migration {
       table.id();
       table.bigInt('user_id').unsigned();
       table.timeStamps();
-      table.foreign('user_id', 'users', 'id',
-          constrained: true, onDelete: 'CASCADE');
+      table.foreign('user_id', 'users', 'id', constrained: true, onDelete: 'CASCADE');
     });
   }
 

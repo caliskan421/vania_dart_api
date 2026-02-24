@@ -48,6 +48,7 @@ class UserDto {
       'address': address,
     };
   }
+
   /// Admin mi?
   bool get isAdmin => role == 'admin';
 

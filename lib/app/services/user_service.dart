@@ -10,8 +10,7 @@ class UserService {
   }
 
   /// Profili güncelle
-  Future<Map<String, dynamic>> updateProfile(
-      int userId, Map<String, dynamic> data) async {
+  Future<Map<String, dynamic>> updateProfile(int userId, Map<String, dynamic> data) async {
     final user = await User().findById(userId);
     if (user == null) {
       throw Exception('User not found');
@@ -32,19 +31,11 @@ class UserService {
   }
 
   /// Tüm kullanıcıları listele (admin)
-  Future<List<Map<String, dynamic>>> getAllUsers(
-      {int page = 1, int perPage = 20}) async {
+  Future<List<Map<String, dynamic>>> getAllUsers({int page = 1, int perPage = 20}) async {
     final offset = (page - 1) * perPage;
-    final userMaps = await User()
-        .query
-        .orderBy('id', 'desc')
-        .limit(perPage)
-        .offset(offset)
-        .get();
+    final userMaps = await User().query.orderBy('id', 'desc').limit(perPage).offset(offset).get();
 
-    return userMaps
-        .map((m) => UserDto.fromMap(m).toSanitizedMap())
-        .toList();
+    return userMaps.map((m) => UserDto.fromMap(m).toSanitizedMap()).toList();
   }
 
   /// Kullanıcı sayısını getir

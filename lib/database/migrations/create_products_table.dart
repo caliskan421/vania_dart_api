@@ -16,8 +16,7 @@ class CreateProductsTable extends Migration {
       table.boolean('is_active');
       table.timeStamps();
       table.softDeletes();
-      table.foreign('category_id', 'categories', 'id',
-          constrained: true, onDelete: 'SET NULL');
+      table.foreign('category_id', 'categories', 'id', constrained: true, onDelete: 'SET NULL');
     });
   }
 

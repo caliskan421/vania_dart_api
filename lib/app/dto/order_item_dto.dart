@@ -44,11 +44,13 @@ class OrderItemDto {
       'total_price': totalPrice,
     };
   }
+
   static int _parseInt(dynamic v) {
     if (v is int) return v;
     if (v is num) return v.toInt();
     return int.tryParse(v.toString()) ?? 0;
   }
+
   static double _parseDouble(dynamic v) {
     if (v is double) return v;
     if (v is num) return v.toDouble();

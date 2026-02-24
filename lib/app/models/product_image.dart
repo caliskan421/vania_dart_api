@@ -8,11 +8,11 @@ class ProductImage extends Model with DtoSchema {
 
   @override
   List<FieldDef> get schema => [
-    FieldDef('product_id', FieldType.integer),
-    FieldDef('image_url', FieldType.string),
-    FieldDef('is_primary', FieldType.boolean),
-    FieldDef('sort_order', FieldType.integer),
-  ];
+        FieldDef('product_id', FieldType.integer),
+        FieldDef('image_url', FieldType.string),
+        FieldDef('is_primary', FieldType.boolean),
+        FieldDef('sort_order', FieldType.integer),
+      ];
 
   /// Tek kayıt — typed döner
   Future<ProductImageDto?> findById(int id) async {
@@ -22,10 +22,7 @@ class ProductImage extends Model with DtoSchema {
 
   /// Ürüne ait resimleri getir (sıralı)
   Future<List<ProductImageDto>> findByProductId(int productId) async {
-    final maps = await query
-        .where('product_id', '=', productId)
-        .orderBy('sort_order', 'asc')
-        .get();
+    final maps = await query.where('product_id', '=', productId).orderBy('sort_order', 'asc').get();
     return maps.map(ProductImageDto.fromMap).toList();
   }
 }

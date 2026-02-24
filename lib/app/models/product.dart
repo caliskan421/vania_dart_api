@@ -8,16 +8,16 @@ class Product extends Model with DtoSchema {
 
   @override
   List<FieldDef> get schema => [
-    FieldDef('category_id', FieldType.integer),
-    FieldDef('name', FieldType.string),
-    FieldDef('slug', FieldType.string),
-    FieldDef('description', FieldType.string, nullable: true),
-    FieldDef('price', FieldType.double_),
-    FieldDef('discount_price', FieldType.double_, nullable: true),
-    FieldDef('stock', FieldType.integer),
-    FieldDef('sku', FieldType.string),
-    FieldDef('is_active', FieldType.boolean),
-  ];
+        FieldDef('category_id', FieldType.integer),
+        FieldDef('name', FieldType.string),
+        FieldDef('slug', FieldType.string),
+        FieldDef('description', FieldType.string, nullable: true),
+        FieldDef('price', FieldType.double_),
+        FieldDef('discount_price', FieldType.double_, nullable: true),
+        FieldDef('stock', FieldType.integer),
+        FieldDef('sku', FieldType.string),
+        FieldDef('is_active', FieldType.boolean),
+      ];
 
   /// Tek kayıt — typed döner
   Future<ProductDto?> findById(int id) async {

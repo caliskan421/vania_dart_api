@@ -8,12 +8,12 @@ class Category extends Model with DtoSchema {
 
   @override
   List<FieldDef> get schema => [
-    FieldDef('name', FieldType.string),
-    FieldDef('slug', FieldType.string),
-    FieldDef('description', FieldType.string, nullable: true),
-    FieldDef('image_url', FieldType.string, nullable: true),
-    FieldDef('is_active', FieldType.boolean),
-  ];
+        FieldDef('name', FieldType.string),
+        FieldDef('slug', FieldType.string),
+        FieldDef('description', FieldType.string, nullable: true),
+        FieldDef('image_url', FieldType.string, nullable: true),
+        FieldDef('is_active', FieldType.boolean),
+      ];
 
   /// Tek kayıt — typed döner
   Future<CategoryDto?> findById(int id) async {

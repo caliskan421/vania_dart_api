@@ -36,6 +36,7 @@ class CartItemDto {
       'unit_price': unitPrice,
     };
   }
+
   /// Kalem toplam tutarı
   double get totalPrice => unitPrice * quantity;
 
@@ -44,6 +45,7 @@ class CartItemDto {
     if (v is num) return v.toInt();
     return int.tryParse(v.toString()) ?? 0;
   }
+
   static double _parseDouble(dynamic v) {
     if (v is double) return v;
     if (v is num) return v.toDouble();

@@ -68,10 +68,15 @@ class OrderDto {
       'invoice_path': invoicePath,
     };
   }
+
   bool get isPending => status == 'pending';
+
   bool get isProcessing => status == 'processing';
+
   bool get isShipped => status == 'shipped';
+
   bool get isDelivered => status == 'delivered';
+
   bool get isCancelled => status == 'cancelled';
 
   static int _parseInt(dynamic v) {
@@ -79,6 +84,7 @@ class OrderDto {
     if (v is num) return v.toInt();
     return int.tryParse(v.toString()) ?? 0;
   }
+
   static double _parseDouble(dynamic v) {
     if (v is double) return v;
     if (v is num) return v.toDouble();

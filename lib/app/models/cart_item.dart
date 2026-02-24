@@ -8,11 +8,11 @@ class CartItem extends Model with DtoSchema {
 
   @override
   List<FieldDef> get schema => [
-    FieldDef('cart_id', FieldType.integer),
-    FieldDef('product_id', FieldType.integer),
-    FieldDef('quantity', FieldType.integer),
-    FieldDef('unit_price', FieldType.double_),
-  ];
+        FieldDef('cart_id', FieldType.integer),
+        FieldDef('product_id', FieldType.integer),
+        FieldDef('quantity', FieldType.integer),
+        FieldDef('unit_price', FieldType.double_),
+      ];
 
   /// Tek kayıt — typed döner
   Future<CartItemDto?> findById(int id) async {

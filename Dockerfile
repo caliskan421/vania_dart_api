@@ -19,26 +19,36 @@ COPY . .
 # 📦 Create a production build
 RUN dart pub get --offline
 
-# Comment the following line if you don't want to create tables.
-RUN vania migrate
-
+# Migration build sırasında DB bağlantısı gerektirir - Railway'de deploy sonrası ayrı çalıştırılır
 RUN vania build
 
 # Build minimal serving image from AOT-compiled `/server`
 # and the pre-built AOT-runtime in the `/runtime/` directory of the base image.
-FROM scratch
+# Use debian-slim for shell support (Railway PORT env var needs runtime expansion)
+FROM debian:bookworm-slim
 
 # Comment the following line if you are not serving static files.
 COPY --from=build /runtime/ /
 COPY --from=build /app/bin/server /bin/server
-COPY --from=build /app/.env /
+# .env kopyalanmaz - Railway env variables kullanılır (güvenlik)
 COPY --from=build /app/public /public/
 COPY --from=build /app/storage /storage/
 COPY --from=build /app/lib/lang /lib/lang
 COPY --from=build /app/lib/resources /lib/resources
 
-# Expose the server port (useful for binding)
-EXPOSE 8000
+# Railway: PORT env var is set at runtime. Vania uses APP_PORT.
+# Use --port when PORT is set so app binds to Railway's assigned port.
+RUN echo '#!/bin/sh\n\
+if [ -n "$PORT" ]; then\n\
+  exec /bin/server -p "$PORT"\n\
+else\n\
+  exec /bin/server\n\
+fi' > /start.sh && chmod +x /start.sh
 
-# Start server.
-CMD ["/bin/server"]
+# Expose the server port (Railway uses PORT, default 8080)
+EXPOSE 8080
+
+WORKDIR /
+
+# Start server (supports Railway PORT via -p flag)
+CMD ["/start.sh"]

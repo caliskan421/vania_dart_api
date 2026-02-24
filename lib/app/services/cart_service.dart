@@ -17,11 +17,7 @@ class CartService {
 
     final cart = await getOrCreateCart(userId);
 
-    final existingItemMap = await CartItem()
-        .query
-        .where('cart_id', '=', cart.id)
-        .where('product_id', '=', productId)
-        .first();
+    final existingItemMap = await CartItem().query.where('cart_id', '=', cart.id).where('product_id', '=', productId).first();
 
     if (existingItemMap != null) {
       final existingItem = CartItemDto.fromMap(existingItemMap);
@@ -52,11 +48,7 @@ class CartService {
   Future<Map<String, dynamic>> updateItemQuantity(int userId, int cartItemId, int quantity) async {
     final cart = await getOrCreateCart(userId);
 
-    final itemMap = await CartItem()
-        .query
-        .where('id', '=', cartItemId)
-        .where('cart_id', '=', cart.id)
-        .first();
+    final itemMap = await CartItem().query.where('id', '=', cartItemId).where('cart_id', '=', cart.id).first();
 
     if (itemMap == null) {
       throw Exception('Cart item not found');
@@ -80,11 +72,7 @@ class CartService {
   Future<Map<String, dynamic>> removeItem(int userId, int cartItemId) async {
     final cart = await getOrCreateCart(userId);
 
-    final itemMap = await CartItem()
-        .query
-        .where('id', '=', cartItemId)
-        .where('cart_id', '=', cart.id)
-        .first();
+    final itemMap = await CartItem().query.where('id', '=', cartItemId).where('cart_id', '=', cart.id).first();
 
     if (itemMap == null) {
       throw Exception('Cart item not found');

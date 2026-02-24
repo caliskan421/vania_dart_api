@@ -19,8 +19,7 @@ class CreateOrdersTable extends Migration {
       table.string('invoice_path').length(500).nullable();
       table.timeStamps();
       table.softDeletes();
-      table.foreign('user_id', 'users', 'id',
-          constrained: true, onDelete: 'CASCADE');
+      table.foreign('user_id', 'users', 'id', constrained: true, onDelete: 'CASCADE');
     });
   }
 

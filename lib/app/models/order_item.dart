@@ -8,13 +8,13 @@ class OrderItem extends Model with DtoSchema {
 
   @override
   List<FieldDef> get schema => [
-    FieldDef('order_id', FieldType.integer),
-    FieldDef('product_id', FieldType.integer),
-    FieldDef('product_name', FieldType.string),
-    FieldDef('quantity', FieldType.integer),
-    FieldDef('unit_price', FieldType.double_),
-    FieldDef('total_price', FieldType.double_),
-  ];
+        FieldDef('order_id', FieldType.integer),
+        FieldDef('product_id', FieldType.integer),
+        FieldDef('product_name', FieldType.string),
+        FieldDef('quantity', FieldType.integer),
+        FieldDef('unit_price', FieldType.double_),
+        FieldDef('total_price', FieldType.double_),
+      ];
 
   /// Tek kayıt — typed döner
   Future<OrderItemDto?> findById(int id) async {

@@ -39,8 +39,7 @@ class CategoryService {
   }
 
   /// Kategoriyi güncelle
-  Future<Map<String, dynamic>> updateCategory(
-      int id, Map<String, dynamic> data) async {
+  Future<Map<String, dynamic>> updateCategory(int id, Map<String, dynamic> data) async {
     final category = await Category().findById(id);
     if (category == null) {
       throw Exception('Category not found');

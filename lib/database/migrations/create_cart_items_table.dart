@@ -10,10 +10,8 @@ class CreateCartItemsTable extends Migration {
       table.integer('quantity');
       table.decimal('unit_price', precision: 10, scale: 2);
       table.timeStamps();
-      table.foreign('cart_id', 'carts', 'id',
-          constrained: true, onDelete: 'CASCADE');
-      table.foreign('product_id', 'products', 'id',
-          constrained: true, onDelete: 'CASCADE');
+      table.foreign('cart_id', 'carts', 'id', constrained: true, onDelete: 'CASCADE');
+      table.foreign('product_id', 'products', 'id', constrained: true, onDelete: 'CASCADE');
     });
   }
 

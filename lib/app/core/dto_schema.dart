@@ -78,3 +78,9 @@ mixin DtoSchema {
     return _fillableCache!;
   }
 }
+
+/// [Sorun]: fillable getter'ı her çağrıda schema.map((f) => f.name).toList() ile yeni bir liste oluşturuyordu.
+/// Vania framework'ün _validateFieldsForAssignment metodu ise bu listeye .add() ile created_at, updated_at, deleted_at eklemeye çalışıyordu.
+/// Ama getter her seferinde yeni liste döndürdüğü için bu eklemeler kayboluyordu. Sonuç: insert/update verilerinde created_at veya updated_at bulunan her istek
+/// InvalidArgumentException fırlatıyordu.
+/// [Düzeltme]: _fillableCache ile liste cache'lendi. Artık Vania'nın .add() çağrıları kalıcı.

@@ -61,17 +61,20 @@ class ProductDto {
 
   /// Stokta var mı?
   bool get inStock => stock > 0;
+
   static bool _parseBool(dynamic v) {
     if (v is bool) return v;
     if (v is num) return v == 1;
     final s = v.toString().trim().toLowerCase();
     return s == '1' || s == 'true';
   }
+
   static int _parseInt(dynamic v) {
     if (v is int) return v;
     if (v is num) return v.toInt();
     return int.tryParse(v.toString()) ?? 0;
   }
+
   static double _parseDouble(dynamic v) {
     if (v is double) return v;
     if (v is num) return v.toDouble();

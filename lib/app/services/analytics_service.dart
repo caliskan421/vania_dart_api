@@ -40,8 +40,7 @@ class AnalyticsService {
   }
 
   Future<double> _getTotalRevenue() async {
-    final orderMaps =
-        await Order().query.where('status', '!=', 'cancelled').get();
+    final orderMaps = await Order().query.where('status', '!=', 'cancelled').get();
 
     double total = 0;
     for (final map in orderMaps) {
@@ -52,32 +51,23 @@ class AnalyticsService {
   }
 
   Future<int> _getTotalProducts() async {
-    final products =
-        await Product().query.where('is_active', '=', true).get();
+    final products = await Product().query.where('is_active', '=', true).get();
     return products.length;
   }
 
   Future<Map<String, int>> _getOrdersByStatus() async {
-    final statuses = [
-      'pending',
-      'processing',
-      'shipped',
-      'delivered',
-      'cancelled'
-    ];
+    final statuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
     final result = <String, int>{};
 
     for (final status in statuses) {
-      final orders =
-          await Order().query.where('status', '=', status).get();
+      final orders = await Order().query.where('status', '=', status).get();
       result[status] = orders.length;
     }
 
     return result;
   }
 
-  Future<List<Map<String, dynamic>>> _getPopularProducts(
-      {int limit = 10}) async {
+  Future<List<Map<String, dynamic>>> _getPopularProducts({int limit = 10}) async {
     final allOrderItemMaps = await OrderItem().query.get();
 
     final productSales = <int, int>{};
@@ -86,14 +76,11 @@ class AnalyticsService {
     for (final map in allOrderItemMaps) {
       final item = OrderItemDto.fromMap(map);
 
-      productSales[item.productId] =
-          (productSales[item.productId] ?? 0) + item.quantity;
-      productRevenue[item.productId] =
-          (productRevenue[item.productId] ?? 0) + item.totalPrice;
+      productSales[item.productId] = (productSales[item.productId] ?? 0) + item.quantity;
+      productRevenue[item.productId] = (productRevenue[item.productId] ?? 0) + item.totalPrice;
     }
 
-    final sortedProducts = productSales.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
+    final sortedProducts = productSales.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
 
     final result = <Map<String, dynamic>>[];
     for (final entry in sortedProducts.take(limit)) {
@@ -103,8 +90,7 @@ class AnalyticsService {
           'product_id': entry.key,
           'product_name': product.name,
           'total_sold': entry.value,
-          'total_revenue': double.parse(
-              (productRevenue[entry.key] ?? 0).toStringAsFixed(2)),
+          'total_revenue': double.parse((productRevenue[entry.key] ?? 0).toStringAsFixed(2)),
         });
       }
     }
@@ -112,13 +98,8 @@ class AnalyticsService {
     return result;
   }
 
-  Future<List<Map<String, dynamic>>> _getRecentOrders(
-      {int limit = 5}) async {
-    final orderMaps = await Order()
-        .query
-        .orderBy('created_at', 'desc')
-        .limit(limit)
-        .get();
+  Future<List<Map<String, dynamic>>> _getRecentOrders({int limit = 5}) async {
+    final orderMaps = await Order().query.orderBy('created_at', 'desc').limit(limit).get();
 
     final result = <Map<String, dynamic>>[];
     for (final map in orderMaps) {

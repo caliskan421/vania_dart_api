@@ -12,10 +12,8 @@ class CreateOrderItemsTable extends Migration {
       table.decimal('unit_price', precision: 10, scale: 2);
       table.decimal('total_price', precision: 10, scale: 2);
       table.timeStamps();
-      table.foreign('order_id', 'orders', 'id',
-          constrained: true, onDelete: 'CASCADE');
-      table.foreign('product_id', 'products', 'id',
-          constrained: true, onDelete: 'CASCADE');
+      table.foreign('order_id', 'orders', 'id', constrained: true, onDelete: 'CASCADE');
+      table.foreign('product_id', 'products', 'id', constrained: true, onDelete: 'CASCADE');
     });
   }
 
